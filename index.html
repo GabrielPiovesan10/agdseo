@@ -66,6 +66,7 @@
             line-height: 1.5;
             transition: background-color 0.4s ease, color 0.4s ease;
             min-height: 100vh;
+            overflow-x: hidden; /* Evita scroll horizontal indesejado */
         }
 
         /* Navbar */
@@ -76,9 +77,12 @@
             padding: 16px 40px;
             background: var(--nav-bg);
             backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px); /* Suporte para Safari */
             border-bottom: 1px solid var(--card-border);
             position: sticky;
             top: 0;
+            left: 0;
+            width: 100%;
             z-index: 100;
         }
 
@@ -104,6 +108,7 @@
             align-items: center;
             justify-content: center;
             transition: all 0.3s ease;
+            flex-shrink: 0;
         }
 
         .theme-btn:hover {
@@ -139,6 +144,7 @@
         .glass-card {
             background: var(--card-bg);
             backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             border: 1px solid var(--card-border);
             border-radius: 16px;
             padding: 28px;
@@ -235,6 +241,7 @@
             font-size: 15px;
             outline: none;
             transition: all 0.3s ease;
+            width: 100%;
         }
 
         .form-group input:focus, .form-group textarea:focus {
@@ -258,6 +265,7 @@
             gap: 10px;
             transition: all 0.3s ease;
             margin-top: 10px;
+            width: 100%;
         }
 
         .submit-btn:hover {
@@ -286,6 +294,8 @@
         .calendar-header h3 {
             font-size: 18px;
             font-weight: 500;
+            text-align: center;
+            flex: 1;
         }
 
         .icon-btn {
@@ -382,7 +392,11 @@
             margin-bottom: 24px;
             border-bottom: 1px solid var(--card-border);
             padding-bottom: 16px;
+            overflow-x: auto;
+            white-space: nowrap;
         }
+
+        .tabs::-webkit-scrollbar { height: 0px; } /* Esconder scrollbar das tabs no mobile */
 
         .tab-btn {
             background: transparent;
@@ -411,6 +425,7 @@
             flex: 1;
             overflow-y: auto;
             padding-right: 8px;
+            max-height: 500px; /* Previne que a lista cresça infinitamente e quebre layout em algumas telas */
         }
 
         .events-list-container::-webkit-scrollbar { width: 6px; }
@@ -447,6 +462,13 @@
         .event-item-title {
             font-size: 16px;
             font-weight: 600;
+            word-break: break-word;
+        }
+        
+        .event-date-container {
+            display: flex; 
+            align-items: center; 
+            gap: 12px;
         }
 
         .event-item-date {
@@ -526,10 +548,18 @@
             position: fixed;
             bottom: 24px;
             right: 24px;
+            left: 24px;
             z-index: 9999;
             display: flex;
             flex-direction: column;
             gap: 12px;
+            pointer-events: none; /* Não interfere no clique de outros elementos */
+        }
+
+        @media (min-width: 768px) {
+            #toast-container {
+                left: auto; /* Volta para a direita no desktop */
+            }
         }
 
         .toast {
@@ -544,6 +574,7 @@
             align-items: center;
             gap: 12px;
             animation: slideIn 0.3s ease-out forwards;
+            pointer-events: all;
         }
         
         .toast.error {
@@ -560,10 +591,78 @@
             to { transform: translateX(100%); opacity: 0; }
         }
 
-        /* Responsive */
+        /* ======================================= */
+        /* RESPONSIVO (MOBILE FIRST & AJUSTES FINAIS) */
+        /* ======================================= */
+        
         @media (max-width: 1024px) {
             .dashboard-grid { grid-template-columns: 1fr; }
-            .search-box { max-width: 100%; }
+            .search-box { max-width: 100%; width: 100%; }
+        }
+
+        @media (max-width: 768px) {
+            /* Navbar e Tema fixados */
+            .top-nav {
+                padding: 12px 20px;
+            }
+            .logo {
+                font-size: 18px;
+            }
+            .theme-btn {
+                width: 38px;
+                height: 38px;
+                font-size: 16px;
+            }
+
+            /* Container e Cartões */
+            .main-container {
+                margin: 20px auto;
+                padding: 0 16px;
+            }
+            .glass-card, .calendar-card {
+                padding: 20px;
+            }
+
+            /* Formulário em 1 coluna no celular */
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            /* Ajustes nos Itens do Histórico */
+            .event-item-header {
+                flex-direction: column;
+                gap: 12px;
+            }
+            .event-date-container {
+                width: 100%;
+                justify-content: space-between; /* Afasta data do botão excluir */
+            }
+
+            /* Abas */
+            .tabs {
+                gap: 8px;
+            }
+            .tab-btn {
+                padding: 6px 12px;
+                font-size: 14px;
+            }
+
+            /* Calendário mais compacto */
+            .calendar-days-header {
+                font-size: 12px;
+            }
+            .calendar-day {
+                font-size: 13px;
+                border-radius: 6px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .event-item-details {
+                flex-direction: column;
+                gap: 12px;
+            }
         }
     </style>
 </head>
@@ -895,7 +994,7 @@
                 <li class="event-item">
                     <div class="event-item-header">
                         <div class="event-item-title">${ev.name}</div>
-                        <div style="display:flex; align-items:center; gap: 12px;">
+                        <div class="event-date-container">
                             <div class="event-item-date">
                                 <i class="fa-regular fa-calendar"></i> ${formatDateBR(ev.date)} às ${ev.time}
                             </div>
